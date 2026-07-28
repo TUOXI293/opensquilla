@@ -268,6 +268,9 @@ def build_cron_route_envelope(
     tool_policy = getattr(job, "tool_policy", None)
     if isinstance(tool_policy, dict) and tool_policy:
         metadata["tool_policy"] = dict(tool_policy)
+    workspace_dir = str(getattr(job, "workspace_dir", "") or "").strip()
+    if workspace_dir:
+        metadata["workspace_dir"] = workspace_dir
     reply_target = None
     delivery_context = {
         "sender_id": sender_id,

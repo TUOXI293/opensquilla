@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from opensquilla.gateway.rpc import RpcContext
-from opensquilla.gateway.rpc_cron import _handle_cron_update
+from opensquilla.gateway.rpc_cron import _handle_cron_update, _job_to_wire
 from opensquilla.scheduler.engine import SchedulerEngine
 from opensquilla.scheduler.jobs import apply_result
 from opensquilla.scheduler.payloads import make_agent_turn_payload, payload_text
@@ -107,5 +109,38 @@ async def test_update_enabled_false_applies_sibling_fields(tmp_path: Path) -> No
         assert after is not None
         assert after.status == JobStatus.PAUSED
         assert payload_text(after.payload, after.session_target) == "new prompt"
+    finally:
+        await store.close()
+
+
+async def test_update_workspace_round_trips_to_wire(tmp_path: Path) -> None:
+    engine, store = await _make_engine(tmp_path)
+    workspace = tmp_path / "project"
+    workspace.mkdir()
+    try:
+        job = await _add_recurring_job(engine)
+
+        await _handle_cron_update(
+            {"id": job.id, "workspaceDir": str(workspace)}, _ctx(engine)
+        )
+
+        after = await store.get(job.id)
+        assert after is not None
+        assert after.workspace_dir == str(workspace.resolve())
+        assert _job_to_wire(after)["workspaceDir"] == str(workspace.resolve())
+    finally:
+        await store.close()
+
+
+async def test_update_workspace_rejects_missing_directory(tmp_path: Path) -> None:
+    engine, store = await _make_engine(tmp_path)
+    try:
+        job = await _add_recurring_job(engine)
+
+        with pytest.raises(ValueError, match="does not exist"):
+            await _handle_cron_update(
+                {"id": job.id, "workspaceDir": str(tmp_path / "missing")},
+                _ctx(engine),
+            )
     finally:
         await store.close()

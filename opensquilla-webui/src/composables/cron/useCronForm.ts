@@ -36,6 +36,8 @@ export function useCronForm(options: UseCronFormOptions) {
     agentId: 'main',
     sessionTarget: 'isolated',
     targetSessionKey: '',
+    workspaceMode: 'agent',
+    workspaceDir: '',
     message: '',
     wakeMode: 'now',
     deliveryMode: '',
@@ -98,6 +100,11 @@ export function useCronForm(options: UseCronFormOptions) {
     form.payloadKind = payloadKind
     form.sessionTarget = sessionTarget
     form.targetSessionKey = job ? jobSessionKey(job) : (tpl.targetSessionKey || activeChatSessionKey() || '')
+    const workspaceDir = job
+      ? (job.workspaceDir || job.workspace_dir || '')
+      : (tpl.workspaceDir || '')
+    form.workspaceDir = workspaceDir
+    form.workspaceMode = workspaceDir || tpl.requiresWorkspace ? 'custom' : 'agent'
     form.every = form.type === 'every' ? (job ? (job.scheduleRaw || job.schedule_raw || '') : String(tpl.every_seconds || '')) : ''
     form.at = form.type === 'at' ? (job ? (job.scheduleRaw || job.schedule_raw || '') : (tpl.at || '')) : ''
     form.tz = job ? (job.tz || '') : (tpl.tz || '')
@@ -184,6 +191,16 @@ export function useCronForm(options: UseCronFormOptions) {
       agentId: form.agentId.trim() || 'main',
       sessionTarget,
       text: form.message.trim(),
+    }
+    if (payloadKind === 'agent_turn' && form.workspaceMode === 'custom') {
+      const workspaceDir = form.workspaceDir.trim()
+      if (!workspaceDir) {
+        pushToast(t('cronSkills.form.toastWorkspaceRequired'), { tone: 'danger' })
+        return
+      }
+      payload.workspaceDir = workspaceDir
+    } else {
+      payload.workspaceDir = ''
     }
 
     if (form.type === 'cron') {

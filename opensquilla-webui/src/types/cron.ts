@@ -29,6 +29,8 @@ export interface CronJob {
   target_session_key?: string
   sessionKey?: string
   session_key?: string
+  workspaceDir?: string
+  workspace_dir?: string
 }
 
 export interface DeliveryConfig {
@@ -77,6 +79,8 @@ export interface CronPanelTemplate {
   sessionTarget?: string
   agentId?: string
   targetSessionKey?: string
+  workspaceDir?: string
+  requiresWorkspace?: boolean
 }
 
 export interface CronDeliveryFormValues {
@@ -106,6 +110,8 @@ export interface CronJobFormModel {
   agentId: string
   sessionTarget: string
   targetSessionKey: string
+  workspaceMode: 'agent' | 'custom'
+  workspaceDir: string
   message: string
   wakeMode: string
   deliveryMode: string

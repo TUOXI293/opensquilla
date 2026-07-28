@@ -143,7 +143,11 @@ def _build_cron_tool_context(
     )
     workspace_dir = None
     workspace_strict = False
-    if workspace_resolver is not None:
+    job_workspace = str(getattr(job, "workspace_dir", "") or "").strip()
+    if job_workspace:
+        workspace_dir = job_workspace
+        workspace_strict = True
+    elif workspace_resolver is not None:
         workspace_dir, workspace_strict = workspace_resolver(agent_id)
     return tool_context_from_envelope(
         envelope,

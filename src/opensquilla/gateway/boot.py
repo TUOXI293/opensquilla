@@ -1090,8 +1090,15 @@ async def dispatch_task_runtime_turn(
     """
     from opensquilla.gateway.routing import tool_context_from_envelope
 
-    workspace_dir = resolve_agent_workspace_dir(run.agent_id, config)
-    workspace_strict = getattr(config, "workspace_strict", None)
+    task_workspace = str(
+        getattr(run.envelope, "metadata", {}).get("workspace_dir") or ""
+    ).strip()
+    workspace_dir = (
+        Path(task_workspace).expanduser()
+        if task_workspace
+        else resolve_agent_workspace_dir(run.agent_id, config)
+    )
+    workspace_strict = True if task_workspace else getattr(config, "workspace_strict", None)
     if not isinstance(workspace_strict, bool):
         workspace_strict = bool(workspace_dir)
     is_owner = _task_runtime_envelope_owner(run.envelope)

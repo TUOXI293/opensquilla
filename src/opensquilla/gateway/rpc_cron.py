@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, TypeGuard
 
 from opensquilla.gateway.rpc import RpcContext, RpcUnavailableError, get_dispatcher
@@ -38,6 +39,19 @@ def _require_scheduler(ctx: RpcContext) -> Any:
     if scheduler is None:
         raise RpcUnavailableError("Cron scheduler is not available")
     return scheduler
+
+
+def _workspace_dir_from_params(params: dict[str, Any]) -> str:
+    raw = params.get("workspaceDir", params.get("workspace_dir", ""))
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        raise ValueError("workspaceDir must be an absolute directory path")
+    if not path.is_dir():
+        raise ValueError(f"workspaceDir does not exist or is not a directory: {value}")
+    return str(path.resolve())
 
 
 def _job_to_wire(j: Any) -> dict[str, Any]:
@@ -84,6 +98,8 @@ def _job_to_wire(j: Any) -> dict[str, Any]:
         "text": text,
         "payloadKind": kind,
         "agentId": payload_agent_id(payload, "main"),
+        "workspaceDir": d.get("workspace_dir", "") or "",
+        "workspace_dir": d.get("workspace_dir", "") or "",
         "status": status_str,
         "enabled": (
             bool(d.get("enabled", True)) and status_str not in ("paused", "disabled", "deleted")
@@ -625,6 +641,7 @@ async def _finalize_cron_add(
         tz=tz_value,
         jitter_seconds=jitter_seconds,
         creator_is_owner=True,
+        workspace_dir=_workspace_dir_from_params(params),
         schedule_kind=schedule_kind,
         schedule_value=schedule_value,
         schedule_tz=tz_value,
@@ -773,6 +790,9 @@ async def _handle_cron_update(params: dict | None, ctx: RpcContext) -> dict[str,
 
     if "timeout" in params:
         patch["timeout_seconds"] = float(params["timeout"])
+
+    if "workspaceDir" in params or "workspace_dir" in params:
+        patch["workspace_dir"] = _workspace_dir_from_params(params)
 
     if "wakeMode" in params or "wake_mode" in params:
         patch["wake_mode"] = _resolve_wake_mode(

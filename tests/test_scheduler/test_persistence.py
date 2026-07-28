@@ -10,7 +10,7 @@ from opensquilla.scheduler.types import CronJob, JobReservation, ScheduleKind
 
 
 @pytest.mark.asyncio
-async def test_scheduler_persistence_round_trips_tool_policy(tmp_path) -> None:
+async def test_scheduler_persistence_round_trips_tool_policy_and_workspace(tmp_path) -> None:
     store = JobStore(str(tmp_path / "scheduler.db"))
     await store.open()
     try:
@@ -25,6 +25,7 @@ async def test_scheduler_persistence_round_trips_tool_policy(tmp_path) -> None:
                 "also_allow": ["memory_search"],
                 "deny": ["web_fetch"],
             },
+            workspace_dir=str(tmp_path),
         )
 
         await store.save(job)
@@ -38,6 +39,7 @@ async def test_scheduler_persistence_round_trips_tool_policy(tmp_path) -> None:
         "also_allow": ["memory_search"],
         "deny": ["web_fetch"],
     }
+    assert loaded.workspace_dir == str(tmp_path)
 
 
 @pytest.mark.asyncio

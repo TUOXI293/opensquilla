@@ -271,6 +271,7 @@ const automationTemplates: AutomationTemplate[] = [
     expression: '30 17 * * 5',
     payloadKind: 'agent_turn',
     sessionTarget: 'isolated',
+    requiresWorkspace: true,
     message: '汇总本周已完成任务、进行中事项和主要交付物，整理为结构化周报。必须包含：本周成果、关键数据、风险与阻塞、需要协作的事项、下周三项最高优先级。对无法确认的信息明确标为待核验。',
   },
   {
@@ -299,6 +300,7 @@ const automationTemplates: AutomationTemplate[] = [
     expression: '0 10 * * 1-5',
     payloadKind: 'agent_turn',
     sessionTarget: 'isolated',
+    requiresWorkspace: true,
     message: '检查当前工作区中的项目状态、近期错误日志、未完成事项与可能延期的交付。按高、中、低风险分级，说明证据、影响范围和建议动作。不要执行删除、发布或修改生产配置等不可逆操作。',
   },
   {
@@ -313,6 +315,7 @@ const automationTemplates: AutomationTemplate[] = [
     expression: '0 18 * * 0',
     payloadKind: 'agent_turn',
     sessionTarget: 'isolated',
+    requiresWorkspace: true,
     message: '整理本周新增的笔记、会议纪要与收藏内容。合并重复主题，提炼关键结论，建议标签和关联条目，并输出下周最值得继续消化的 5 项内容。保留原始来源路径或链接。',
   },
   {

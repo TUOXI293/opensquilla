@@ -145,6 +145,7 @@ class SchedulerOps:
         creator_session_key: str = "",
         creator_sender_id: str = "",
         creator_is_owner: bool = False,
+        workspace_dir: str = "",
     ) -> CronJob:
         """Validate the structured schedule, compute jitter, persist a new CronJob.
 
@@ -220,6 +221,7 @@ class SchedulerOps:
             creator_session_key=creator_session_key or "",
             creator_sender_id=creator_sender_id or "",
             creator_is_owner=bool(creator_is_owner),
+            workspace_dir=workspace_dir.strip(),
         )
 
         if kind == ScheduleKind.AT:
@@ -283,6 +285,8 @@ class SchedulerOps:
         for field in ("name", "timeout_seconds", "enabled", "origin_session_key"):
             if field in patch:
                 setattr(job, field, patch.pop(field))
+        if "workspace_dir" in patch:
+            job.workspace_dir = str(patch.pop("workspace_dir") or "").strip()
         if "tool_policy" in patch:
             job.tool_policy = dict(patch.pop("tool_policy") or {})
         if "wake_mode" in patch:

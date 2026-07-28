@@ -52,6 +52,24 @@
               <select id="cp-payload-kind-simple" v-model="form.payloadKind" class="cron-field__input" @change="emit('payloadKindChange')"><option value="reminder">{{ t('cronSkills.panel.modeReminder') }}</option><option value="agent_turn">{{ t('cronSkills.panel.modeAgentTurn') }}</option><option value="system_event">{{ t('cronSkills.panel.modeSystemEvent') }}</option></select>
               <div class="cron-field__hint">{{ jobModeHint }}</div>
             </div>
+            <div v-if="form.payloadKind === 'agent_turn'" class="cron-field">
+              <label class="cron-field__label" for="cp-workspace-mode">{{ t('cronSkills.panel.workspace') }}</label>
+              <select id="cp-workspace-mode" v-model="form.workspaceMode" class="cron-field__input">
+                <option value="agent">{{ t('cronSkills.panel.workspaceAgentDefault') }}</option>
+                <option value="custom">{{ t('cronSkills.panel.workspaceCustom') }}</option>
+              </select>
+              <input
+                v-if="form.workspaceMode === 'custom'"
+                id="cp-workspace-dir"
+                v-model="form.workspaceDir"
+                class="cron-field__input cron-field__input--mono"
+                type="text"
+                :placeholder="t('cronSkills.panel.workspacePlaceholder')"
+                autocomplete="off"
+                spellcheck="false"
+              >
+              <div class="cron-field__hint">{{ t('cronSkills.panel.workspaceHint') }}</div>
+            </div>
             <div class="cron-field"><label class="cron-field__label" for="cp-message">{{ messageLabel }}</label><textarea id="cp-message" v-model="form.message" class="cron-field__input cron-field__input--textarea" rows="4" :placeholder="t('cronSkills.panel.friendlyMessagePlaceholder')" /></div>
             <details ref="runtimeSettingsRef" class="cron-advanced cron-advanced--runtime">
               <summary class="cron-advanced__summary">{{ t('cronSkills.panel.moreRuntimeSettings') }}</summary>
